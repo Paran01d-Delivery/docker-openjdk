@@ -49,6 +49,7 @@ RUN set -ex; \
 	\
 # deal with slim variants not having man page directories (which causes "update-alternatives" to fail)
 # ="$JAVA_DEBIAN_VERSION"
+# ="$CA_CERTIFICATES_JAVA_VERSION"
 	if [ ! -d /usr/share/man/man1 ]; then \
 		mkdir -p /usr/share/man/man1; \
 	fi; \
@@ -56,7 +57,7 @@ RUN set -ex; \
 	apt-get update; \
 	apt-get install -y \
 		openjdk-8-jre \
-		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
+		ca-certificates-java \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
