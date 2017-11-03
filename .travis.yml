@@ -5,14 +5,14 @@ services:
 env:
   global:
   - COMMIT=${TRAVIS_COMMIT::8}
-  - REPO=dairyd/debian
+  - REPO=dairyd/openjdk
   - secure: r50P1HyjPRBz46NpZ0HpQozo+YBOccI6dVuLeRA3T1mB15QnZKV/yoc7DSNRstvPqH0iiq7s/2jhbi8cALIAco72+hnlvJAIFjDexPHKwkWqqplN81s8nUCHaoOeiihNXGZsrh2EpPjpqfiZezuiLtCnpbME8Nshcs+wXXKxMRdT4VVOL5Qre1SJoYoHOAL+flKvmC0orHpe2Oyy12CjMGhYmQGq/H446VfHj4Nz3Ql7Oke42TS+ZUgoeX1o2OlQHQFaTfV5GyaRuyFODeyCgKrsW5iSUt4RJdiNRN0YlY9JOChY61dmw+k3Qr8unmBlYmCNrHjgkoYaB3kbaW6l5c3pIfVUm1Osxs9L9gGLvZoJRTRWt5utZTVS0Gkhmm/wuA3z9EajUm6LELeiIyYhaQKQM2zHUZApysXKKD5+s0MG5gWJkgEH7mwAM54TI6diPYUTvb+6moBPiMdOMkNq/dhOn4fyfJYbeaaLzQO57+sU3hI/KUl3iYvosmNGpQwhYIPWGUXjQkxquZv5oZPzUKZ4Nll/V4Ji7dcviERQAx5dTk2KDu6R2EtlCKoNexAEIf3wDJXwjxfNbRMWCnjs/yoShgPBMqqkADb1KOVH5MVHVgV45L/5BfJoqRd/7LFTWpMDs0L4gP/uMOkW9RmIKXAFZffqN6QgzpDZvdyuojs=
   - secure: C10O9B8cT/Fq8sQwejD/wevQl+gckSH/iKUBkOXVyJSDcU3DyuUZ3/EXZOREm0z5bY7ESw+yIp7iO7QpAlZkiTIKN/SaQwiyI9ZKW/VgCQ+I4fBuZi5yowwn2PaTmyYdnrjrJQzrPinvQJBXpA4b97vuexJOaDDgSt1OHcNhV/4zu2NLoh9lsoBdP16LO0IiKNxDG/2CQynf6uiDFR/LU/9u+HmySFdKTbg48O5xRrRDBOd5tgqT6dtzFau0lhl9sXuNoVAnDZN0RK+Bn04Ot7HEJkuwkAWNkxugyYBSejUB2r8L4sM+G50m8hBGEm+2EFaQHOLfE6JObQ/dMeMEDtYEyUjitHD48AuqJzP4bVzU1mGjwCwYSmLIiQ9BGG00ElNBGpH8UydrlOjbPnGy/Bf86fOjLv7nMVQIe/MPyE2wsu5iq1ybOPAz0BB4VNN8dBtznoPy8kt9sjokffGybZI/809VNcKhIuRlEd4zqMAS6E3EkkjhmbTupRWk9XkMdWjIO/SWaSN/iwocudB+lAvLwI9b61vFbipJBsz7SD1vFs81gigvrcNNe+SH9CLbULe5zQUheo99Ew7sSHJQzM97mJL4Whr+3gGo0ZTkyNBcIoVmNtiHeZ95gaHMnUC4kg9L2BLUwJLWYnUqMwTioHgGX7wHkFAyN2lqjzb9uqA=
   - secure: w5WcyRyYMi3YBi8kJ8aCTDm8X8q6AL8+f/+tvPj6dki5JHV6T2JYSi26h9+yhgcchsKPBeJX5WNgd+ei8eNAzJ8u4mB8u34LDJUtI7+hg7pFkNexIAAt/XX54vaIgcPciA33HLd5PglGiEZzxiTahNrEwaSVQdTYXNBqlco0rztbWieDYQOM8j7jrHBOytCW2fBbTlXUBOu2QuYpeZqlUTzFq0/OgcZGoy0pGKT1HEYLiq/NN88fjkvRXWyxfmrhDi6KM47PHfdFycYwM9z23vGZ8OYrql/ijCMEJ98iY2fDSkpIid9i8mqnsDtJ7JTEt9aLAXqtewivhD9FWNXX9OLNFhd3eomws3id35qhNVblG6Tvx5BkoZxQgRU+ZeRbq87KcCZYgJTCxn8+1kJzYkb3vpe5+WJpeydrqlTOKjRqjdN/r6gJYyFXmEuQX+Mr8W6oqHetXbYEmnut6Aac83wNVvW143gLganfBMvjhNa0uaNr/WwiS3kd+8uEjTxwTiI8KyAmHjdnjCH++3aTnLF4Btsbuf2Gp24AZWxb4vMF4JKOQ3tw+bBV1pJ4U2LKWrf1l/w7h1xJ6mgBfbexJ3Ki9jdh4qhkH5CDPRT1EZ6HP6UcVnD1XbnvNEHUgHaXg4CTVhrBvo/iwwtVWJMX6/3Ygg/5y4/n52CWYSUUbIo=
 script:
 - export TAG=`if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master"
-  ]]; then echo "jessie"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
-- export REPO=dairyd/debian
+  ]]; then echo "8-jre"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
+- export REPO=dairyd/openjdk
 - docker build -t $REPO:$TAG -f Dockerfile .
 after_success:
 - docker login -u $DOCKER_USER -p $DOCKER_PASS
