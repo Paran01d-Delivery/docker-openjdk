@@ -46,13 +46,14 @@ ENV CA_CERTIFICATES_JAVA_VERSION 20170531+nmu1
 RUN set -ex; \
 	\
 # deal with slim variants not having man page directories (which causes "update-alternatives" to fail)
+# ="$JAVA_DEBIAN_VERSION"
 	if [ ! -d /usr/share/man/man1 ]; then \
 		mkdir -p /usr/share/man/man1; \
 	fi; \
 	\
 	apt-get update; \
 	apt-get install -y \
-		openjdk-8-jre="$JAVA_DEBIAN_VERSION" \
+		openjdk-8-jre \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
