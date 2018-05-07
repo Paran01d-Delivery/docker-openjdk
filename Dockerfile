@@ -59,7 +59,7 @@ RUN set -ex; \
 	apt-cache madison openjdk-8-jre; \
 	apt-cache madison ca-certificates-java; \
 	apt-get install -y \
-		openjdk-8-jre="$JAVA_DEBIAN_VERSION" \
+		openjdk-8-jre \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION"; \
 	rm -rf /var/lib/apt/lists/*; \
 	[ "$(readlink -f "$JAVA_HOME")" = "$(docker-java-home)" ]; \
