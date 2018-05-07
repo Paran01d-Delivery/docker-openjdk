@@ -57,6 +57,7 @@ RUN set -ex; \
 	fi; \
 	apt-get update; \
 	apt-cache madison openjdk-8-jre; \
+	apt-cache madison ca-certificates-java; \
 	apt-get install -y \
 		openjdk-8-jre="$JAVA_DEBIAN_VERSION" \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION"; \
