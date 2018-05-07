@@ -1,7 +1,7 @@
 FROM dairyd/buildpack-deps:stretch-curl
 MAINTAINER Leo Luduena<lleo@linux.com>
 
-ENV REFRESHED_AT 2017-11-16
+ENV REFRESHED_AT 2018-05-01
 
 # A few reasons for installing distribution-provided OpenJDK:
 #
