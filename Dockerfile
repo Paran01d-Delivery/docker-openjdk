@@ -1,5 +1,7 @@
 FROM dairyd/buildpack-deps:stretch-curl
 
+LABEL maintainer="devops@yungas.co"
+
 ENV REFRESHED_AT 2018-10-15
 
 # A few reasons for installing distribution-provided OpenJDK:
