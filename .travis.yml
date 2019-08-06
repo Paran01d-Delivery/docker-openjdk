@@ -9,8 +9,7 @@ env:
   - secure: Hupt/aReubgvnx2pV0hvEgXVbVM98fw8Yrfv0E03ZTIk8I9qzIy7ILRMMYgFNF8S2Acn4dGeZ7ZjT2g6k/An64Th8P3nkv2xgwIamFTdlL3A26wNPrUf/lM6BflFyce8Jc6IBCROQYYZtEtfdD3c9ol2hQfMmHu9TChtjHJ7WXqVPaAstqq+sPU1FUXsm42KXs7bhJ0O4KH+E5F+D4cps0uCx/tE8WDxtWjprFhraAaUHFCdZo0BM0+zqXYsyqbp7uqBTMpfnBNo4TDbgz8inmpQ9TVcEmir9YmOaeNl9N0KAOkyicSJZHa5oatbnwJ/YimA60XUCpwaEoc6sltHmJBcnDAOhASmCPLfO1nsw4oyGmZtro6iMohExn++sdOhrsihSiZZv6nQzIXlj1jM0qBl+NWSA0SCa+eN+P/IllW1w3CqC9rzcmgf+t+q8UMH9Ql2rKHJwv+Jf/cfOAah2ImYcH6Ux0untQqlSh+OGjz1YBPWsAbHtv1ftgVzd4dXmNNo8lTgHZq21VviUYDSg18iw0M9GhN9RRKWBE2U+GHjOh0DCpZUm3M80TgmnUpvRhutixITQ16NqUyAiqlPlN5hY5gfhpnkN6Mz8UmK5ilmHzffHx8a15xDyWAJhFmkSxGs/aYKG0+gb52bZsdjNk6q5FzUbeol8QXnLTOXJlc=
   - secure: MP2TPkHlXui5ljM//QIjUFmPDzxEZuobaRAwa+PTCSXgC6Wfbnu2igP4MJMbSB+KZIsW7Xo7WfGPV+/dlKKl1KljU5bHCFYpekA/a2f7p/GUH81B7YDFq9WdyfClObQnYwJ+/Qu2grd/gE4dsoFDAQCLjQplRstZECsTCgquKDcbE8SBwK7LY4B/bUOsvgmU5RrpvrrUT0k70L3WOH0eteUZCg5kD4/xa06Dr2zC1CYDzlAuE7AJ5hyHm4S7hvRNMi6YfTX+0sQAOA1vei6B9KWhB3bcqyL1sdok/jgSpYMd5PFsgjrQKrHlU/8kO4oFqf6I2XTCKNEsZ6kS+Ubqip3/Tw+TiIPejBA8Oy4JIkhdMHVrwUG32kFKjUtFnHv0cZ4CjtEq6KEqQcHnbJh+IwXYCjRUXmsFmf6IM7sGWijwtEqVGGWwV5TlIt8MJFe0VIi+AIlUYBEcuCmkq+PoJrONg29OApcD0KPKNjiDEpLo08yWi45bTBmWYeuU2r5fK5BRZ4WKbJz8HLJzp8raNrbpobedeOEMx0fPVwTxBPSo9gpXm4pAZBipj7IJClgVWsSFL2/AIOZc9gkZ+FuuRC2tzkzh/IZQl/OjZd+3GOPnJNwm0yrPzXPIbrgirmOPCA8U7HA+2V8vyhX03wUeW0FZJKcMeQyc5/OWv7hsd5I=
 script:
-- export TAG=`if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_BRANCH == "master"
-  ]]; then echo "8-jre"; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi`
+- export TAG="8-jdk"
 - export REPO=dairyd/openjdk
 - docker build -t $REPO:$TAG -f Dockerfile .
 after_success:
