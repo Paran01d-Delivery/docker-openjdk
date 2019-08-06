@@ -4,66 +4,91 @@ LABEL maintainer="7of9@ydevops.com"
 
 ENV REFRESHED_AT 2019-08-05
 
-# A few reasons for installing distribution-provided OpenJDK:
-#
-#  1. Oracle.  Licensing prevents us from redistributing the official JDK.
-#
-#  2. Compiling OpenJDK also requires the JDK to be installed, and it gets
-#     really hairy.
-#
-#     For some sample build times, see Debian's buildd logs:
-#       https://buildd.debian.org/status/logs.php?pkg=openjdk-8
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
 		bzip2 \
 		unzip \
 		xz-utils \
-	&& rm -rf /var/lib/apt/lists/*
+		\
+# utilities for keeping Debian and OpenJDK CA certificates in sync
+		ca-certificates p11-kit \
+		\
+# java.lang.UnsatisfiedLinkError: /usr/local/openjdk-11/lib/libfontmanager.so: libfreetype.so.6: cannot open shared object file: No such file or directory
+# java.lang.NoClassDefFoundError: Could not initialize class sun.awt.X11FontManager
+# https://github.com/docker-library/openjdk/pull/235#issuecomment-424466077
+		fontconfig libfreetype6 \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
 # Default to UTF-8 file.encoding
 ENV LANG C.UTF-8
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV JAVA_HOME /usr/local/openjdk-8
+ENV PATH $JAVA_HOME/bin:$PATH
 
-# add a simple script that can auto-detect the appropriate JAVA_HOME value
-# based on whether the JDK or only the JRE is installed
-RUN { \
-		echo '#!/bin/sh'; \
-		echo 'set -e'; \
-		echo; \
-		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
-	} > /usr/local/bin/docker-java-home \
-	&& chmod +x /usr/local/bin/docker-java-home
+# backwards compatibility shim
+RUN { echo '#/bin/sh'; echo 'echo "$JAVA_HOME"'; } > /usr/local/bin/docker-java-home && chmod +x /usr/local/bin/docker-java-home && [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
-# do some fancy footwork to create a JAVA_HOME that's cross-architecture-safe
-RUN ln -svT "/usr/lib/jvm/java-8-openjdk-$(dpkg --print-architecture)" /docker-java-home
-ENV JAVA_HOME /docker-java-home/jre
+# https://adoptopenjdk.net/upstream.html
+ENV JAVA_VERSION 8u222
+ENV JAVA_BASE_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_
+ENV JAVA_URL_VERSION 8u222b10
+# https://github.com/docker-library/openjdk/issues/320#issuecomment-494050246
 
-ENV JAVA_VERSION 8u151
-ENV JAVA_DEBIAN_VERSION 8u151-b12-1~deb9u1
-
-# see https://bugs.debian.org/775775
-# and https://github.com/docker-library/java/issues/19#issuecomment-70546872
-ENV CA_CERTIFICATES_JAVA_VERSION 20170531+nmu1
-
-# OpenJDK:
-## deal with slim variants not having man page directories (which causes "update-alternatives" to fail)
-## verify that "docker-java-home" returns what we expect
-## update-alternatives so that future installs of other OpenJDK versions don't change /usr/bin/java
-## ... and verify that it actually worked for one of the alternatives we care about
-## see CA_CERTIFICATES_JAVA_VERSION notes above
-RUN set -ex; \
-	if [ ! -d /usr/share/man/man1 ]; then \
-		mkdir -p /usr/share/man/man1; \
-	fi; \
-	apt-get update; \
-	apt-cache madison openjdk-8-jre; \
-	apt-cache madison ca-certificates-java; \
-	apt-get install -y \
-		openjdk-8-jre \
-		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION"; \
-	rm -rf /var/lib/apt/lists/*; \
-	[ "$(readlink -f "$JAVA_HOME")" = "$(docker-java-home)" ]; \
-	update-alternatives --get-selections | awk -v home="$(readlink -f "$JAVA_HOME")" 'index($3, home) == 1 { $2 = "manual"; print | "update-alternatives --set-selections" }'; \
-	update-alternatives --query java | grep -q 'Status: manual'; \
-  /var/lib/dpkg/info/ca-certificates-java.postinst configure
+RUN set -eux; \
+	\
+	dpkgArch="$(dpkg --print-architecture)"; \
+	case "$dpkgArch" in \
+		amd64) upstreamArch='x64' ;; \
+		arm64) upstreamArch='aarch64' ;; \
+		*) echo >&2 "error: unsupported architecture: $dpkgArch" ;; \
+	esac; \
+	\
+	wget -O openjdk.tgz.asc "${JAVA_BASE_URL}${upstreamArch}_linux_${JAVA_URL_VERSION}.tar.gz.sign"; \
+	wget -O openjdk.tgz "${JAVA_BASE_URL}${upstreamArch}_linux_${JAVA_URL_VERSION}.tar.gz" --progress=dot:giga; \
+	\
+	export GNUPGHOME="$(mktemp -d)"; \
+# TODO find a good link for users to verify this key is right (https://mail.openjdk.java.net/pipermail/jdk-updates-dev/2019-April/000951.html is one of the only mentions of it I can find); perhaps a note added to https://adoptopenjdk.net/upstream.html would make sense?
+	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys CA5F11C6CE22644D42C6AC4492EF8D39DC13168F; \
+# https://github.com/docker-library/openjdk/pull/322#discussion_r286839190
+	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys EAC843EBD3EFDB98CC772FADA5CD6035332FA671; \
+	gpg --batch --list-sigs --keyid-format 0xLONG CA5F11C6CE22644D42C6AC4492EF8D39DC13168F | grep '0xA5CD6035332FA671' | grep 'Andrew Haley'; \
+	gpg --batch --verify openjdk.tgz.asc openjdk.tgz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
+	\
+	mkdir -p "$JAVA_HOME"; \
+	tar --extract \
+		--file openjdk.tgz \
+		--directory "$JAVA_HOME" \
+		--strip-components 1 \
+		--no-same-owner \
+	; \
+	rm openjdk.tgz*; \
+	\
+# TODO strip "demo" and "man" folders?
+	\
+# update "cacerts" bundle to use Debian's CA certificates (and make sure it stays up-to-date with changes to Debian's store)
+# see https://github.com/docker-library/openjdk/issues/327
+#     http://rabexc.org/posts/certificates-not-working-java#comment-4099504075
+#     https://salsa.debian.org/java-team/ca-certificates-java/blob/3e51a84e9104823319abeb31f880580e46f45a98/debian/jks-keystore.hook.in
+#     https://git.alpinelinux.org/aports/tree/community/java-cacerts/APKBUILD?id=761af65f38b4570093461e6546dcf6b179d2b624#n29
+	{ \
+		echo '#!/usr/bin/env bash'; \
+		echo 'set -Eeuo pipefail'; \
+		echo 'if ! [ -d "$JAVA_HOME" ]; then echo >&2 "error: missing JAVA_HOME environment variable"; exit 1; fi'; \
+# 8-jdk uses "$JAVA_HOME/jre/lib/security/cacerts" and 8-jre and 11+ uses "$JAVA_HOME/lib/security/cacerts" directly (no "jre" directory)
+		echo 'cacertsFile=; for f in "$JAVA_HOME/lib/security/cacerts" "$JAVA_HOME/jre/lib/security/cacerts"; do if [ -e "$f" ]; then cacertsFile="$f"; break; fi; done'; \
+		echo 'if [ -z "$cacertsFile" ] || ! [ -f "$cacertsFile" ]; then echo >&2 "error: failed to find cacerts file in $JAVA_HOME"; exit 1; fi'; \
+		echo 'trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose=server-auth "$cacertsFile"'; \
+	} > /etc/ca-certificates/update.d/docker-openjdk; \
+	chmod +x /etc/ca-certificates/update.d/docker-openjdk; \
+	/etc/ca-certificates/update.d/docker-openjdk; \
+	\
+# https://github.com/docker-library/openjdk/issues/331#issuecomment-498834472
+	find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
+	ldconfig; \
+	\
+# basic smoke test
+	java -version
