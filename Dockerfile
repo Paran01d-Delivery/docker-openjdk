@@ -3,7 +3,7 @@ FROM dairyd/buildpack-deps:stretch-curl
 LABEL maintainer="7of9@ydevops.com"
 
 ENV REFRESHED_AT 2019-08-05
-
+ENV DEBIAN_FRONTEND noninteractive
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
@@ -88,7 +88,8 @@ RUN set -eux; \
 	\
 # https://github.com/docker-library/openjdk/issues/331#issuecomment-498834472
 	find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
-	ldconfig; \
-	\
+	ldconfig; 
+#	\
+#	\
 # basic smoke test
-	java -version
+#	java -version
