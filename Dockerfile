@@ -1,9 +1,10 @@
-FROM dairyd/buildpack-deps:stretch-curl
+FROM buildpack-deps:stretch-scm
 
 LABEL maintainer="7of9@ydevops.com"
 
-ENV REFRESHED_AT 2019-08-05
+ENV REFRESHED_AT 2019-08-06
 ENV DEBIAN_FRONTEND noninteractive
+
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
@@ -32,7 +33,7 @@ RUN { echo '#/bin/sh'; echo 'echo "$JAVA_HOME"'; } > /usr/local/bin/docker-java-
 
 # https://adoptopenjdk.net/upstream.html
 ENV JAVA_VERSION 8u222
-ENV JAVA_BASE_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jre_
+ENV JAVA_BASE_URL https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_
 ENV JAVA_URL_VERSION 8u222b10
 # https://github.com/docker-library/openjdk/issues/320#issuecomment-494050246
 
@@ -88,8 +89,8 @@ RUN set -eux; \
 	\
 # https://github.com/docker-library/openjdk/issues/331#issuecomment-498834472
 	find "$JAVA_HOME/lib" -name '*.so' -exec dirname '{}' ';' | sort -u > /etc/ld.so.conf.d/docker-openjdk.conf; \
-	ldconfig; 
-#	\
-#	\
+	ldconfig; \
+	\
 # basic smoke test
-#	java -version
+	javac -version; \
+	java -version
