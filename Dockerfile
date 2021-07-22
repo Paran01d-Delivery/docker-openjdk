@@ -1,8 +1,8 @@
 FROM dairyd/buildpack-deps:stretch-curl
 
-LABEL maintainer="7of9@ydevops.com"
+LABEL maintainer="docker@lleox.org"
 
-ENV REFRESHED_AT 2020-04-18
+ENV REFRESHED_AT 2021-07-21
 ENV DEBIAN_FRONTEND noninteractive
 RUN set -eux; \
 	apt-get update; \
